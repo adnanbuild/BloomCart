@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BloomCart – Curated Amazon Picks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blush:#fdf0f0;--rose:#f4c7c7;--petal:#e8a0a0;
+  --bloom:#c9636a;--deep:#8b3a40;--text:#3a2020;
+  --muted:#9b7070;--white:#fff9f9;--card:#ffffff;
+  --border:#f0d8d8;--gold:#d4956a
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--blush);color:var(--text)}
+
+/* NAV */
+header{background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(180,100,100,.07)}
+.header-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:68px;gap:16px}
+.logo{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:600;color:var(--bloom);letter-spacing:-.5px;text-decoration:none;white-space:nowrap}
+.logo em{color:var(--gold);font-style:italic}
+.hdr-right{display:flex;align-items:center;gap:12px}
+.search-wrap{position:relative;display:flex;align-items:center}
+.search-wrap svg{position:absolute;left:12px;color:var(--muted);pointer-events:none;z-index:1}
+.search-wrap input{border:1.5px solid var(--border);border-radius:50px;padding:8px 16px 8px 38px;font-family:'DM Sans',sans-serif;font-size:.87rem;background:var(--blush);color:var(--text);width:210px;transition:.25s}
+.search-wrap input:focus{outline:none;border-color:var(--petal);width:250px;background:var(--white)}
+.suggestions{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--white);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 8px 28px rgba(180,100,100,.13);z-index:500;overflow:hidden;display:none}
+.suggestions.show{display:block}
+.sug-item{padding:9px 16px;font-size:.85rem;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:9px;transition:.15s}
+.sug-item:hover{background:var(--blush);color:var(--bloom)}
+.sug-item svg{color:var(--muted);flex-shrink:0}
+.sug-item mark{background:none;color:var(--bloom);font-weight:600}
+.menu-btn{background:none;border:none;cursor:pointer;padding:8px;color:var(--bloom);display:flex;flex-direction:column;gap:5px}
+.menu-btn span{display:block;width:22px;height:2px;background:currentColor;border-radius:2px}
+
+/* DRAWER */
+.overlay{position:fixed;inset:0;background:rgba(58,32,32,.45);z-index:200;opacity:0;pointer-events:none;transition:.3s}
+.overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;top:0;right:0;width:280px;height:100%;background:var(--white);z-index:201;transform:translateX(110%);transition:.35s cubic-bezier(.4,0,.2,1);padding:28px}
+.drawer.open{transform:translateX(0)}
+.drawer-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted);float:right;margin-bottom:28px;padding:4px}
+.drawer h3{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--bloom);margin-bottom:18px;clear:both}
+.drawer a{display:block;padding:13px 0;border-bottom:1px solid var(--border);text-decoration:none;color:var(--text);font-size:.95rem;font-weight:500;transition:.2s}
+.drawer a:hover{color:var(--bloom);padding-left:8px}
+
+/* HERO */
+.hero{max-width:1280px;margin:28px auto;padding:0 24px}
+.hero-wrap{border-radius:22px;overflow:hidden;background:linear-gradient(135deg,#fce8e8,#fdf5f0);position:relative;width:100%;padding-top:56.25%;box-shadow:0 8px 40px rgba(180,100,100,.13)}
+.slides-track{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;transition:.6s cubic-bezier(.4,0,.2,1)}
+.slide{min-width:100%;height:100%;display:flex;align-items:center;padding:48px 64px;gap:56px;position:relative;overflow:hidden}
+.slide::before{content:'';position:absolute;right:-100px;top:-100px;width:550px;height:550px;background:radial-gradient(circle,rgba(244,199,199,.55) 0%,transparent 70%);pointer-events:none}
+.slide-text{flex:1;z-index:1}
+.slide-badge{display:inline-block;background:var(--bloom);color:#fff;font-size:.72rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:4px 13px;border-radius:50px;margin-bottom:14px}
+.slide-text h2{font-family:'Playfair Display',serif;font-size:2.5rem;line-height:1.22;color:var(--deep);margin-bottom:12px}
+.slide-text p{color:var(--muted);line-height:1.65;font-size:.93rem;margin-bottom:20px;max-width:380px}
+.slide-stars{color:var(--gold);font-size:.95rem;margin-bottom:22px}
+.btn-buy:hover{background:var(--deep);transform:translateY(-2px);box-shadow:0 8px 22px rgba(140,58,64,.3)}
+.slide-img{width:clamp(180px,28%,320px);height:clamp(180px,28%,340px);object-fit:contain;z-index:1;filter:drop-shadow(0 14px 32px rgba(180,100,100,.22));border-radius:14px;background:rgba(255,255,255,.55);padding:14px}
+.slide-ph{width:clamp(180px,28%,320px);height:clamp(180px,28%,340px);background:rgba(255,255,255,.55);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:5rem;z-index:1}
+.hero-dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--rose);border:none;cursor:pointer;transition:.3s}
+.dot.active{background:var(--bloom);width:24px;border-radius:4px}
+.arrow{position:absolute;top:50%;transform:translateY(-50%);background:var(--white);border:1px solid var(--border);width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;transition:.2s}
+.arrow:hover{background:var(--bloom);color:#fff;border-color:var(--bloom)}
+.arr-l{left:16px}
+.arr-r{right:16px}
+.btn-buy{display:inline-flex;align-items:center;gap:9px;background:var(--bloom);color:#fff;border:none;border-radius:50px;padding:14px 32px;font-size:1rem;font-weight:600;cursor:pointer;text-decoration:none;transition:.25s;font-family:'DM Sans',sans-serif;letter-spacing:.2px}
+
+/* CATS */
+.cat-tabs{max-width:1280px;margin:0 auto;padding:32px 24px 14px;display:flex;gap:10px;flex-wrap:wrap}
+.cat-tab{padding:8px 18px;border-radius:50px;border:1.5px solid var(--border);background:var(--white);color:var(--muted);font-size:.85rem;font-weight:500;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif}
+.cat-tab:hover,.cat-tab.active{background:var(--bloom);color:#fff;border-color:var(--bloom)}
+
+/* SECTION HEAD */
+.sec-head{max-width:1280px;margin:0 auto;padding:16px 24px 18px}
+.sec-head h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--deep);display:flex;align-items:center;gap:14px}
+.sec-head h2::after{content:'';flex:1;height:1px;background:var(--border);max-width:180px}
+.sec-head p{color:var(--muted);font-size:.88rem;margin-top:5px}
+
+/* GRID */
+.products-sec{max-width:1280px;margin:0 auto;padding:0 24px 48px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(218px,1fr));gap:20px}
+.card{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;transition:.3s}
+.card:hover{transform:translateY(-5px);box-shadow:0 14px 38px rgba(180,100,100,.16);border-color:var(--rose)}
+.card-img{width:100%;height:200px;background:linear-gradient(135deg,#fdf0f0,#fce8e8);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.card-img img{width:100%;height:100%;object-fit:contain;padding:16px}
+.card-ph{font-size:3.5rem}
+.badge{position:absolute;top:10px;left:10px;font-size:.67rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:50px;background:var(--bloom);color:#fff}
+.badge.new{background:#5b9e78}
+.badge.sale{background:var(--gold)}
+.badge.trending{background:#7b68c8}
+.card-body{padding:14px}
+.card-body h3{font-size:.88rem;font-weight:500;line-height:1.4;color:var(--text);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-stars{color:var(--gold);font-size:.8rem;margin-bottom:8px}
+.card-desc{font-size:.77rem;color:var(--muted);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.btn-amz{display:flex;align-items:center;justify-content:center;gap:6px;background:var(--bloom);color:#fff;border:none;border-radius:8px;padding:9px;width:100%;font-size:.82rem;font-weight:500;cursor:pointer;text-decoration:none;transition:.2s;font-family:'DM Sans',sans-serif}
+.btn-amz:hover{background:var(--deep)}
+.empty{grid-column:1/-1;text-align:center;padding:64px 20px;color:var(--muted)}
+.empty span{font-size:3.5rem;display:block;margin-bottom:14px}
+
+/* FOOTER */
+footer{background:var(--deep);color:#f0c8c8;margin-top:60px}
+.footer-grid{max-width:1280px;margin:0 auto;padding:56px 28px 40px;display:grid;grid-template-columns:1.4fr 1fr 1.4fr;gap:48px}
+.fcol h4{font-family:'Playfair Display',serif;font-size:1.1rem;color:#fff;margin-bottom:16px}
+.about-text{font-size:.87rem;line-height:1.7;color:#d4b0b0}
+.socials{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.soc-link{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:.85rem;transition:.2s}
+.soc-link:hover{background:var(--bloom)}
+.reviews-list{display:flex;flex-direction:column;gap:12px;max-height:320px;overflow-y:auto}
+.rev-item{background:rgba(255,255,255,.07);border-radius:10px;padding:12px 14px;border:1px solid rgba(255,255,255,.1)}
+.rev-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.rev-name{font-size:.83rem;font-weight:500;color:#fff}
+.rev-stars{color:var(--gold);font-size:.78rem}
+.rev-txt{font-size:.78rem;color:#c9a8a8;line-height:1.5}
+/* review form */
+.rev-form{display:flex;flex-direction:column;gap:10px}
+.rev-form input,.rev-form textarea{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:.85rem;color:#fff;resize:none}
+.rev-form input::placeholder,.rev-form textarea::placeholder{color:#c0a0a0}
+.rev-form input:focus,.rev-form textarea:focus{outline:none;border-color:var(--rose)}
+.star-pick{display:flex;gap:6px}
+.star-pick button{background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:.35;transition:.15s;color:var(--gold)}
+.star-pick button.sel,.star-pick button:hover~button{opacity:.35}
+.star-pick button.sel,.star-pick:hover button{opacity:1}
+.star-pick button:hover~button{opacity:.35!important}
+.btn-submit{background:var(--bloom);color:#fff;border:none;border-radius:8px;padding:10px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;transition:.2s}
+.btn-submit:hover{background:#a84e54}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);text-align:center;padding:18px 24px;font-size:.78rem;color:#b09898}
+
+/* SHOP BY CATEGORY SECTION */
+.sbc-section{max-width:1280px;margin:0 auto;padding:0 24px 48px}
+.sbc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-top:4px}
+.sbc-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:24px 16px;text-align:center;cursor:pointer;transition:.3s;display:flex;flex-direction:column;align-items:center;gap:10px}
+.sbc-card:hover{border-color:var(--bloom);background:linear-gradient(135deg,#fdf0f0,#fff9f9);transform:translateY(-3px);box-shadow:0 10px 28px rgba(180,100,100,.14)}
+.sbc-icon{font-size:2.2rem;line-height:1}
+.sbc-name{font-size:.88rem;font-weight:500;color:var(--text)}
+.sbc-count{font-size:.75rem;color:var(--muted)}
+
+/* PRODUCT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(58,32,32,.55);z-index:300;opacity:0;pointer-events:none;transition:.3s;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:22px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;transform:translateY(24px) scale(.97);transition:.35s cubic-bezier(.4,0,.2,1);box-shadow:0 24px 60px rgba(100,40,40,.2)}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-img{width:100%;height:280px;background:linear-gradient(135deg,#fdf0f0,#fce8e8);display:flex;align-items:center;justify-content:center;border-radius:22px 22px 0 0;overflow:hidden}
+.modal-img img{width:100%;height:100%;object-fit:contain;padding:24px}
+.modal-img-ph{font-size:6rem}
+.modal-body{padding:28px}
+.modal-badge{display:inline-block;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:3px 11px;border-radius:50px;background:var(--bloom);color:#fff;margin-bottom:12px}
+.modal-title{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--deep);line-height:1.3;margin-bottom:8px}
+.modal-stars{color:var(--gold);font-size:1rem;margin-bottom:6px}
+.modal-cat{font-size:.8rem;color:var(--muted);margin-bottom:16px}
+.modal-desc{font-size:.93rem;color:var(--text);line-height:1.7;margin-bottom:24px}
+.modal-footer{display:flex;gap:12px;align-items:center}
+.modal-close-btn{position:absolute;top:16px;right:16px;background:var(--white);border:1px solid var(--border);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;color:var(--muted);transition:.2s;z-index:1}
+.modal-close-btn:hover{background:var(--bloom);color:#fff;border-color:var(--bloom)}
+.modal-wrap{position:relative}
+
+@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){
+  .slide{flex-direction:column;padding:20px 20px;gap:14px;text-align:center}
+  .slide-text h2{font-size:1.4rem}
+  .slide-text p{font-size:.82rem;margin-bottom:12px}
+  .slide-stars{margin-bottom:12px}
+  .footer-grid{grid-template-columns:1fr}
+  .search-wrap input{width:140px}
+  .sbc-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  .modal-img{height:200px}
+  .modal-title{font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">Bloom<em>Cart</em></a>
+    <div class="hdr-right">
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search products…" oninput="onSearch()" onfocus="showSuggestions()" autocomplete="off">
+        <div class="suggestions" id="suggestions"></div>
+      </div>
+      <button class="menu-btn" onclick="openNav()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="overlay" id="overlay" onclick="closeNav()"></div>
+<nav class="drawer" id="drawer">
+  <button class="drawer-close" onclick="closeNav()">✕</button>
+  <h3>Explore</h3>
+  <a href="#" onclick="tagFilter('new');closeNav()">✦ New Arrivals</a>
+  <a href="#" onclick="tagFilter('best-selling');closeNav()">★ Best Selling</a>
+  <a href="#catSection" onclick="closeNav()">↪ About Us</a>
+  <h3 style="margin-top:20px">Categories</h3>
+  <div id="drawerCats"></div>
+</nav>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-wrap">
+    <button class="modal-close-btn" onclick="closeModalDirect()">✕</button>
+    <div class="modal" id="modal">
+      <div class="modal-img" id="modalImg"></div>
+      <div class="modal-body">
+        <div id="modalBadge"></div>
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <div class="modal-stars" id="modalStars"></div>
+        <p class="modal-cat" id="modalCat"></p>
+        <p class="modal-desc" id="modalDesc"></p>
+        <div class="modal-footer">
+          <a id="modalLink" href="#" class="btn-buy" target="_blank" rel="nofollow noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Buy on Amazon
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-wrap">
+    <div class="slides-track" id="slidesTrack"></div>
+    <div class="hero-dots" id="heroDots"></div>
+    <button class="arrow arr-l" onclick="slide(-1)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <button class="arrow arr-r" onclick="slide(1)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
+</section>
+
+<div id="catSection"></div>
+<div class="cat-tabs" id="catTabs"></div>
+
+<div class="sec-head">
+  <h2 id="secTitle">All Products</h2>
+  <p id="secSub">Handpicked Amazon favourites</p>
+</div>
+<section class="products-sec">
+  <div class="grid" id="grid"></div>
+</section>
+
+<!-- SHOP BY CATEGORY -->
+<div class="sec-head" id="sbcHead">
+  <h2>Shop by Category</h2>
+  <p>Browse products by category</p>
+</div>
+<section class="sbc-section">
+  <div class="sbc-grid" id="sbcGrid"></div>
+</section>
+
+<footer id="footer">
+  <div class="footer-grid">
+    <div class="fcol">
+      <h4>About BloomCart</h4>
+      <p class="about-text" id="aboutText">We curate the best products on Amazon so you don't have to search. Every pick is handpicked for quality, value, and style.</p>
+      <div class="socials" id="socials"></div>
+    </div>
+    <div class="fcol">
+      <h4>Customer Reviews</h4>
+      <div class="reviews-list" id="reviewsList"></div>
+    </div>
+    <div class="fcol">
+      <h4>Leave a Review</h4>
+      <div class="rev-form">
+        <input type="text" id="rName" placeholder="Your name">
+        <div class="star-pick" id="starPick">
+          <button onclick="setStar(1)">★</button>
+          <button onclick="setStar(2)">★</button>
+          <button onclick="setStar(3)">★</button>
+          <button onclick="setStar(4)">★</button>
+          <button onclick="setStar(5)">★</button>
+        </div>
+        <textarea id="rText" rows="4" placeholder="Write your review…"></textarea>
+        <button class="btn-submit" onclick="submitReview()">Submit Review ✦</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 BloomCart · All purchases complete on Amazon</div>
+</footer>
+
+<script>
+let products=[], reviews=[], settings={about:'',socials:[]};
+let heroData=[], curSlide=0, timer=null;
+let activeCat='all', activeTag=null, query='', selStar=0;
+let categories=[];
+
+function load(){
+  products=JSON.parse(localStorage.getItem('bc_products')||'[]');
+  reviews=JSON.parse(localStorage.getItem('bc_reviews')||'[]');
+  settings=JSON.parse(localStorage.getItem('bc_settings')||JSON.stringify({about:"We curate the best products on Amazon so you don't have to search. Every pick is handpicked for quality, value, and style.",socials:[]}));
+  categories=JSON.parse(localStorage.getItem('bc_categories')||'[]');
+}
+
+function init(){
+  load();
+  render();
+  window.addEventListener('storage',e=>{
+    if(['bc_products','bc_reviews','bc_settings','bc_categories','bc_hero_slides'].includes(e.key)){load();render();}
+  });
+  // Close suggestions on click outside
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('.search-wrap')) hideSuggestions();
+  });
+}
+
+function render(){
+  buildHero();
+  buildCats();
+  buildDrawerCats();
+  buildGrid();
+  buildSBC();
+  buildFooter();
+}
+
+/* ── SEARCH SUGGESTIONS ──────────────────────────────────────── */
+function onSearch(){
+  query=document.getElementById('searchInput').value.toLowerCase();
+  activeTag=null; activeCat='all';
+  document.getElementById('secTitle').textContent=query?`Results for "${query}"`:'All Products';
+  buildCats(); buildGrid();
+  showSuggestions();
+}
+
+function showSuggestions(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const box=document.getElementById('suggestions');
+  if(!q||q.length<1){box.classList.remove('show');return;}
+  const matches=products.filter(p=>p.title.toLowerCase().includes(q)).slice(0,7);
+  if(!matches.length){box.classList.remove('show');return;}
+  box.innerHTML=matches.map(p=>{
+    const hi=p.title.replace(new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi'),'<mark>$1</mark>');
+    return`<div class="sug-item" onclick="pickSuggestion('${p.id}')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span>${hi}</span>
+    </div>`;
+  }).join('');
+  box.classList.add('show');
+}
+
+function hideSuggestions(){document.getElementById('suggestions').classList.remove('show')}
+
+function pickSuggestion(id){
+  const p=products.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('searchInput').value=p.title;
+  query=p.title.toLowerCase();
+  hideSuggestions();
+  buildGrid();
+  openModal(id);
+}
+
+/* ── HERO ──────────────────────────────────────────────────────── */
+function buildHero(){
+  const heroRaw=JSON.parse(localStorage.getItem('bc_hero_slides')||'[]');
+  // support both old (string[]) and new (object[]) format
+  const heroConfig=heroRaw.map(s=>typeof s==='string'?{id:s,customTitle:'',customDesc:''}:s);
+  if(heroConfig.length){
+    heroData=heroConfig.map(s=>({...s,product:products.find(p=>p.id===s.id)})).filter(s=>s.product);
+  }
+  if(!heroData.length){
+    const featured=products.filter(p=>p.badge==='best-selling'||p.badge==='featured');
+    const pool=featured.length?featured:products;
+    heroData=pool.slice(0,5).map(p=>({id:p.id,customTitle:'',customDesc:'',product:p}));
+  }
+  const track=document.getElementById('slidesTrack');
+  const dots=document.getElementById('heroDots');
+  if(!heroData.length){
+    track.innerHTML=`<div class="slide"><div class="slide-text"><span class="slide-badge">Welcome</span><h2>Discover Amazing<br><em>Picks</em></h2><p>The best Amazon products, curated for you.</p></div><div class="slide-ph">🛍️</div></div>`;
+    dots.innerHTML='';return;
+  }
+  track.innerHTML=heroData.map(s=>{
+    const p=s.product;
+    const title=s.customTitle&&s.customTitle.trim()?s.customTitle.trim():p.title;
+    const desc=s.customDesc&&s.customDesc.trim()?s.customDesc.trim():(p.description||'');
+    return`<div class="slide">
+      <div class="slide-text">
+        ${p.badge?`<span class="slide-badge">${bl(p.badge)}</span>`:''}
+        <h2>${title}</h2>
+        <p>${desc}</p>
+        <div class="slide-stars">${st(p.rating)}</div>
+        <a href="${p.amazonLink||'#'}" class="btn-buy" target="_blank" rel="nofollow noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Buy on Amazon
+        </a>
+      </div>
+      ${p.image?`<img class="slide-img" src="${p.image}" alt="${p.title}" onerror="this.outerHTML='<div class=slide-ph>🛍️</div>'">`:`<div class="slide-ph">🛍️</div>`}
+    </div>`;
+  }).join('');
+  dots.innerHTML=heroData.map((_,i)=>`<button class="dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`).join('');
+  goSlide(0);
+}
+
+function goSlide(i){
+  clearInterval(timer);
+  curSlide=(i+heroData.length)%heroData.length;
+  const t=document.getElementById('slidesTrack');
+  if(t) t.style.transform=`translateX(-${curSlide*100}%)`;
+  document.querySelectorAll('.dot').forEach((d,j)=>d.classList.toggle('active',j===curSlide));
+  timer=setInterval(()=>goSlide(curSlide+1),4500);
+}
+function slide(d){goSlide(curSlide+d)}
+
+/* ── CATEGORIES ───────────────────────────────────────────────── */
+function buildCats(){
+  const cats=['all',...new Set(products.map(p=>p.category).filter(Boolean))];
+  document.getElementById('catTabs').innerHTML=cats.map(c=>`
+    <button class="cat-tab${activeCat===c&&!activeTag?' active':''}" onclick="setCat('${c}')">${c==='all'?'All Products':c}</button>`).join('');
+}
+
+function buildDrawerCats(){
+  const cats=[...new Set(products.map(p=>p.category).filter(Boolean))];
+  document.getElementById('drawerCats').innerHTML=cats.length
+    ?cats.map(c=>`<a href="#catSection" onclick="setCat('${c}');closeNav()">${c}</a>`).join('')
+    :'<p style="color:var(--muted);font-size:.85rem;padding:10px 0">No categories yet</p>';
+}
+
+function setCat(c){activeCat=c;activeTag=null;query='';document.getElementById('searchInput').value='';document.getElementById('secTitle').textContent=c==='all'?'All Products':c;document.getElementById('secSub').textContent='Handpicked Amazon favourites';buildCats();buildGrid();}
+function tagFilter(t){activeTag=t;activeCat='all';query='';document.getElementById('searchInput').value='';document.getElementById('secTitle').textContent=t==='new'?'New Arrivals':'Best Selling';buildCats();buildGrid();}
+
+/* ── PRODUCT GRID ─────────────────────────────────────────────── */
+function buildGrid(){
+  let list=products.filter(p=>{
+    if(query) return p.title.toLowerCase().includes(query)||(p.description||'').toLowerCase().includes(query);
+    if(activeTag) return p.badge===activeTag;
+    if(activeCat!=='all') return p.category===activeCat;
+    return true;
+  });
+  const g=document.getElementById('grid');
+  if(!list.length){g.innerHTML=`<div class="empty"><span>🌸</span><p>No products found</p></div>`;return;}
+  g.innerHTML=list.map(p=>`
+    <div class="card" onclick="openModal('${p.id}')" style="cursor:pointer">
+      <div class="card-img">
+        ${p.image?`<img src="${p.image}" alt="${p.title}" onerror="this.parentElement.innerHTML='<div class=card-ph>🛍️</div>'">`:`<div class="card-ph">🛍️</div>`}
+        ${p.badge?`<span class="badge ${p.badge}">${bl(p.badge)}</span>`:''}
+      </div>
+      <div class="card-body">
+        <h3>${p.title}</h3>
+        <div class="card-stars">${st(p.rating)} <small style="color:var(--muted);font-size:.73rem">${p.rating||0}/5</small></div>
+        <p class="card-desc">${p.description||''}</p>
+        <span class="btn-amz" onclick="event.stopPropagation();window.open('${p.amazonLink||'#'}','_blank')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          Buy on Amazon
+        </span>
+      </div>
+    </div>`).join('');
+}
+
+/* ── PRODUCT MODAL ────────────────────────────────────────────── */
+function openModal(id){
+  const p=products.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('modalImg').innerHTML=p.image
+    ?`<img src="${p.image}" alt="${p.title}" onerror="this.outerHTML='<div class=modal-img-ph>🛍️</div>'">`
+    :`<div class="modal-img-ph">🛍️</div>`;
+  document.getElementById('modalBadge').innerHTML=p.badge?`<span class="modal-badge">${bl(p.badge)}</span>`:'';
+  document.getElementById('modalTitle').textContent=p.title;
+  document.getElementById('modalStars').innerHTML=st(p.rating)+` <small style="color:var(--muted);font-size:.8rem">${p.rating||0}/5</small>`;
+  document.getElementById('modalCat').textContent=p.category?`Category: ${p.category}`:'';
+  document.getElementById('modalDesc').textContent=p.description||'No description available.';
+  document.getElementById('modalLink').href=p.amazonLink||'#';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modalOverlay')||e.target.closest('.modal-wrap')===null) closeModalDirect();
+}
+function closeModalDirect(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape') closeModalDirect()});
+
+/* ── SHOP BY CATEGORY ─────────────────────────────────────────── */
+function buildSBC(){
+  const cats=[...new Set(products.map(p=>p.category).filter(Boolean))];
+  const icons={'Electronics':'💻','Beauty':'💄','Home':'🏠','Fashion':'👗','Books':'📚','Sports':'⚽','Toys':'🧸','Kitchen':'🍳','Health':'💊','Garden':'🌿','Pets':'🐾','Travel':'✈️','Music':'🎵','Gaming':'🎮','Food':'🍕'};
+  const sbcGrid=document.getElementById('sbcGrid');
+  const sbcHead=document.getElementById('sbcHead');
+  if(!cats.length){sbcGrid.innerHTML='';sbcHead.style.display='none';return;}
+  sbcHead.style.display='';
+  sbcGrid.innerHTML=cats.map(c=>{
+    const count=products.filter(p=>p.category===c).length;
+    const icon=icons[c]||'🛍️';
+    return`<div class="sbc-card" onclick="setCat('${c}');document.getElementById('catSection').scrollIntoView({behavior:'smooth'})">
+      <div class="sbc-icon">${icon}</div>
+      <div class="sbc-name">${c}</div>
+      <div class="sbc-count">${count} product${count!==1?'s':''}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── FOOTER ───────────────────────────────────────────────────── */
+function buildFooter(){
+  document.getElementById('aboutText').textContent=settings.about||"We curate the best products on Amazon.";
+  const s=settings.socials||[];
+  document.getElementById('socials').innerHTML=s.map(x=>`<a href="${x.url}" class="soc-link" target="_blank" title="${x.platform}">${pIcon(x.platform)}</a>`).join('');
+  const rl=document.getElementById('reviewsList');
+  const all=[...reviews].reverse().slice(0,6);
+  rl.innerHTML=all.length?all.map(r=>`
+    <div class="rev-item">
+      <div class="rev-top"><span class="rev-name">${r.name}</span><span class="rev-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div>
+      <p class="rev-txt">${r.text}</p>
+    </div>`).join(''):`<p style="color:#c0a0a0;font-size:.84rem">Be the first to review!</p>`;
+}
+
+/* ── REVIEW ───────────────────────────────────────────────────── */
+function setStar(n){
+  selStar=n;
+  document.querySelectorAll('#starPick button').forEach((b,i)=>{b.classList.toggle('sel',i<n)});
+}
+function submitReview(){
+  const name=document.getElementById('rName').value.trim();
+  const text=document.getElementById('rText').value.trim();
+  if(!name){alert('Please enter your name');return}
+  if(!selStar){alert('Please select a star rating');return}
+  if(!text){alert('Please write a review');return}
+  reviews.push({name,rating:selStar,text,date:new Date().toISOString()});
+  localStorage.setItem('bc_reviews',JSON.stringify(reviews));
+  document.getElementById('rName').value='';
+  document.getElementById('rText').value='';
+  setStar(0);
+  buildFooter();
+  alert('Thank you for your review! 🌸');
+}
+
+/* ── NAV ──────────────────────────────────────────────────────── */
+function openNav(){document.getElementById('overlay').classList.add('open');document.getElementById('drawer').classList.add('open')}
+function closeNav(){document.getElementById('overlay').classList.remove('open');document.getElementById('drawer').classList.remove('open')}
+
+/* ── HELPERS ──────────────────────────────────────────────────── */
+function st(n){const r=Math.round(n||0);return'★'.repeat(r)+'☆'.repeat(5-r)}
+function bl(b){return{'best-selling':'Best Selling','new':'New Arrival','sale':'Sale','featured':'Featured','trending':'Trending'}[b]||b}
+function pIcon(p){return{'Instagram':'IG','Facebook':'FB','Twitter':'X','Pinterest':'PIN','YouTube':'▶YT','TikTok':'TT'}[p]||'🔗'}
+
+init();
+</script>
+</body>
+</html>
